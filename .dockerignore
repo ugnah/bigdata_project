@@ -1,0 +1,46 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Data files (QUAN TRỌNG - Không copy dữ liệu nặng vào image)
+data/raw/
+data/source/
+*.csv
+*.parquet
+*.json
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local

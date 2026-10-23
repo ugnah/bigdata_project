@@ -1,0 +1,8 @@
+==================================================
+[TEST] ENVIRONMENT SMOKE TEST
+==================================================
+[OK] Python Version: 3.10.12
+[OK] PySpark Version: 3.5.0
+[OK] Spark Version: 3.5.0
+[PASS] Spark Execution PASS: Successfully counted 10000 rows.
+[SUCCESS] Smoke test hoan tat thanh cong!
