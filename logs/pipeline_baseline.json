@@ -1,0 +1,48 @@
+{
+    "timestamp": "2026-11-18T01:00:50.996794",
+    "checkpoint": "checkpoint-3",
+    "environment": {
+        "python_version": "3.13.7",
+        "spark_version": "3.5.0",
+        "master": "local[*]",
+        "os": "nt"
+    },
+    "input_contract": {
+        "raw_input_path": "data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906",
+        "input_size_mb": 439.03,
+        "raw_row_count": 3530109,
+        "initial_partitions": 16
+    },
+    "transformations": {
+        "after_t1_cleaning_count": 3317606,
+        "t1_dropped_rows": 212503,
+        "after_t2_outlier_filter_count": 3312154,
+        "t2_dropped_rows": 5452,
+        "after_t3_feature_engineering_count": 3312154,
+        "total_dropped_rows": 217955,
+        "valid_row_ratio_pct": 93.83
+    },
+    "join_validation": {
+        "lookup_path": "data/source/taxi_zone_lookup.csv",
+        "lookup_total_rows": 265,
+        "lookup_distinct_keys": 265,
+        "join_type": "LEFT",
+        "join_key": "PULocationID == LocationID",
+        "rows_before_join": 3312154,
+        "rows_after_join": 3312154,
+        "matched_valid_zone_rows": 3308365,
+        "unknown_or_outside_nyc_rows": 3789,
+        "unmatched_null_key_rows": 0
+    },
+    "aggregation_output": {
+        "output_path": "output/traffic_zone_hourly_kpi",
+        "output_format": "csv",
+        "write_mode": "overwrite",
+        "output_row_count": 10778,
+        "output_partitions": 1
+    },
+    "baseline_performance": {
+        "total_runtime_seconds": 43.99,
+        "explain_plan_file": "logs/explain_plan.txt"
+    }
+}

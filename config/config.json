@@ -1,0 +1,31 @@
+{
+  "project_name": "NYC_Taxi_Traffic_Analysis_PoC",
+  "checkpoint": "checkpoint-3",
+  "paths": {
+    "raw_input_dir": "data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906",
+    "raw_base_dir": "data/raw/nyc_taxi",
+    "zone_lookup_path": "data/source/taxi_zone_lookup.csv",
+    "output_dir": "output/traffic_zone_hourly_kpi",
+    "quality_report_path": "logs/quality_report.json",
+    "baseline_report_path": "logs/pipeline_baseline.json",
+    "explain_plan_path": "logs/explain_plan.txt"
+  },
+  "io_options": {
+    "input_format": "csv",
+    "output_format": "csv",
+    "write_mode": "overwrite",
+    "coalesce_output": 1
+  },
+  "filter_thresholds": {
+    "min_trip_distance_miles": 0.1,
+    "max_trip_distance_miles": 200.0,
+    "min_duration_minutes": 1.0,
+    "max_duration_minutes": 300.0,
+    "min_speed_mph": 0.5,
+    "max_speed_mph": 80.0,
+    "min_fare_amount": 0.01,
+    "min_total_amount": 0.01,
+    "heavy_congestion_mph": 8.0,
+    "moderate_congestion_mph": 15.0
+  }
+}

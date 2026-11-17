@@ -1,0 +1,103 @@
+{
+    "timestamp": "2026-11-18T00:52:15.573335",
+    "raw_input_path": "data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906",
+    "total_rows": 3530109,
+    "null_summary": {
+        "VendorID": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "tpep_pickup_datetime": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "tpep_dropoff_datetime": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "passenger_count": {
+            "null_count": 969727,
+            "null_pct": 27.4702
+        },
+        "trip_distance": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "RatecodeID": {
+            "null_count": 969727,
+            "null_pct": 27.4702
+        },
+        "store_and_fwd_flag": {
+            "null_count": 969727,
+            "null_pct": 27.4702
+        },
+        "PULocationID": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "DOLocationID": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "payment_type": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "fare_amount": {
+            "null_count": 0,
+            "null_pct": 0.0
+        },
+        "total_amount": {
+            "null_count": 0,
+            "null_pct": 0.0
+        }
+    },
+    "duplicate_check": {
+        "composite_keys": [
+            "VendorID",
+            "tpep_pickup_datetime",
+            "tpep_dropoff_datetime",
+            "PULocationID",
+            "DOLocationID",
+            "trip_distance",
+            "total_amount"
+        ],
+        "distinct_rows": 3516564,
+        "duplicate_rows": 13545,
+        "duplicate_pct": 0.3837
+    },
+    "invalid_row_rules": {
+        "invalid_timestamps_or_non_positive_duration": {
+            "count": 42316,
+            "pct": 1.1987
+        },
+        "invalid_trip_distance": {
+            "count": 158034,
+            "pct": 4.4767
+        },
+        "invalid_negative_or_zero_fare": {
+            "count": 16969,
+            "pct": 0.4807
+        },
+        "outlier_duration_lt1m_or_gt300m": {
+            "count": 82527,
+            "pct": 2.3378
+        },
+        "outlier_speed_lt0_5_or_gt80mph": {
+            "count": 189953,
+            "pct": 5.3809
+        },
+        "zero_or_negative_passengers": {
+            "count": 8602,
+            "pct": 0.2437
+        }
+    },
+    "join_key_integrity": {
+        "lookup_path": "data/source/taxi_zone_lookup.csv",
+        "unmatched_PULocationID_rows": 0,
+        "unmatched_DOLocationID_rows": 0,
+        "unknown_code_264_265_PULocationID_rows": 6200,
+        "unknown_code_264_265_DOLocationID_rows": 25096
+    },
+    "runtime_seconds": 28.49
+}
