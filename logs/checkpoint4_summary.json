@@ -1,0 +1,255 @@
+{
+    "timestamp": "2026-11-18T22:47:24.583258",
+    "commit": "2f3e0ef",
+    "baseline_median_sec": 51.62,
+    "e01_median_sec": 15.85,
+    "e02_median_sec": 23.31,
+    "best_median_sec": 15.85,
+    "best_speedup_pct": 69.29,
+    "speedup_factor": 3.26,
+    "experiments": {
+        "B00_Baseline": {
+            "exp_id": "B00_Baseline",
+            "mode": "baseline",
+            "change_desc": "Baseline Checkpoint 3 (7 separate actions scanning CSV, 19 cols, shuffle.partitions=200)",
+            "hypothesis": "Baseline reference measurement (no optimization applied).",
+            "runs": [
+                67.73,
+                50.5,
+                51.62
+            ],
+            "median_sec": 51.62,
+            "mean_sec": 56.62,
+            "stdev_sec": 9.64,
+            "min_sec": 50.5,
+            "max_sec": 67.73,
+            "correctness_pass": true,
+            "correctness_checks": {
+                "raw_row_count_match": true,
+                "clean_row_count_match": true,
+                "join_unmatched_zero_match": true,
+                "output_row_count_match": true,
+                "sum_total_trips_match": true,
+                "sum_total_revenue_match": true,
+                "top1_signature_match": true
+            },
+            "sample_result": {
+                "timestamp": "2026-11-18T22:45:26.283405",
+                "mode": "baseline",
+                "environment": {
+                    "python_version": "3.13.7",
+                    "spark_version": "3.5.0",
+                    "master": "local[*]",
+                    "os": "nt",
+                    "shuffle_partitions": 200
+                },
+                "input_contract": {
+                    "raw_input_path": "data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906",
+                    "input_size_mb": 439.03,
+                    "raw_row_count": 3530109,
+                    "initial_partitions": 16
+                },
+                "transformations": {
+                    "after_t1_cleaning_count": 3317606,
+                    "t1_dropped_rows": 212503,
+                    "after_t2_outlier_filter_count": 3312154,
+                    "t2_dropped_rows": 5452,
+                    "after_t3_feature_engineering_count": 3312154,
+                    "total_dropped_rows": 217955,
+                    "valid_row_ratio_pct": 93.83
+                },
+                "join_validation": {
+                    "lookup_path": "data/source/taxi_zone_lookup.csv",
+                    "lookup_total_rows": 265,
+                    "lookup_distinct_keys": 265,
+                    "join_type": "LEFT",
+                    "join_key": "PULocationID == LocationID",
+                    "rows_before_join": 3312154,
+                    "rows_after_join": 3312154,
+                    "matched_valid_zone_rows": 3308365,
+                    "unknown_or_outside_nyc_rows": 3789,
+                    "unmatched_null_key_rows": 0
+                },
+                "aggregation_output": {
+                    "output_path": "output/traffic_zone_hourly_kpi",
+                    "output_format": "csv",
+                    "write_mode": "overwrite",
+                    "output_row_count": 10778,
+                    "output_partitions": 1
+                },
+                "correctness_signature": {
+                    "sum_total_trips": 3312154,
+                    "sum_total_revenue_usd": 99587514.55,
+                    "sum_congested_trips": 1151467,
+                    "top1_record_signature": "161_13_10569"
+                },
+                "baseline_performance": {
+                    "total_runtime_seconds": 51.62,
+                    "explain_plan_file": "logs/explain_plan.txt"
+                }
+            }
+        },
+        "E01_Eliminate_Recompute": {
+            "exp_id": "E01_Eliminate_Recompute",
+            "mode": "e01_no_recompute",
+            "change_desc": "Consolidate stage count checks into 1 pass + persist(MEMORY_AND_DISK) on df_agg",
+            "hypothesis": "Nếu pipeline Baseline chậm vì quét lại file CSV 439.03 MB tới 7 lần qua các lệnh .count(), .show() và .write() rời rạc, thì khi gộp phép đếm kiểm chứng vào 1 pass và persist(MEMORY_AND_DISK) trên df_agg, số lần FileScan CSV giảm từ 7 xuống 2 và median runtime giảm mạnh, trong khi 10,778 dòng KPI giữ nguyên 100%.",
+            "runs": [
+                17.5,
+                15.85,
+                14.56
+            ],
+            "median_sec": 15.85,
+            "mean_sec": 15.97,
+            "stdev_sec": 1.47,
+            "min_sec": 14.56,
+            "max_sec": 17.5,
+            "correctness_pass": true,
+            "correctness_checks": {
+                "raw_row_count_match": true,
+                "clean_row_count_match": true,
+                "join_unmatched_zero_match": true,
+                "output_row_count_match": true,
+                "sum_total_trips_match": true,
+                "sum_total_revenue_match": true,
+                "top1_signature_match": true
+            },
+            "sample_result": {
+                "timestamp": "2026-11-18T22:46:14.192675",
+                "mode": "e01_no_recompute",
+                "environment": {
+                    "python_version": "3.13.7",
+                    "spark_version": "3.5.0",
+                    "master": "local[*]",
+                    "os": "nt",
+                    "shuffle_partitions": 200
+                },
+                "input_contract": {
+                    "raw_input_path": "data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906",
+                    "input_size_mb": 439.03,
+                    "raw_row_count": 3530109,
+                    "initial_partitions": 16
+                },
+                "transformations": {
+                    "after_t1_cleaning_count": 3317606,
+                    "t1_dropped_rows": 212503,
+                    "after_t2_outlier_filter_count": 3312154,
+                    "t2_dropped_rows": 5452,
+                    "after_t3_feature_engineering_count": 3312154,
+                    "total_dropped_rows": 217955,
+                    "valid_row_ratio_pct": 93.83
+                },
+                "join_validation": {
+                    "lookup_path": "data/source/taxi_zone_lookup.csv",
+                    "lookup_total_rows": 265,
+                    "lookup_distinct_keys": 265,
+                    "join_type": "LEFT",
+                    "join_key": "PULocationID == LocationID",
+                    "rows_before_join": 3312154,
+                    "rows_after_join": 3312154,
+                    "matched_valid_zone_rows": 3308365,
+                    "unknown_or_outside_nyc_rows": 3789,
+                    "unmatched_null_key_rows": 0
+                },
+                "aggregation_output": {
+                    "output_path": "output/traffic_zone_hourly_kpi",
+                    "output_format": "csv",
+                    "write_mode": "overwrite",
+                    "output_row_count": 10778,
+                    "output_partitions": 1
+                },
+                "correctness_signature": {
+                    "sum_total_trips": 3312154,
+                    "sum_total_revenue_usd": 99587514.55,
+                    "sum_congested_trips": 1151467,
+                    "top1_record_signature": "161_13_10569"
+                },
+                "baseline_performance": {
+                    "total_runtime_seconds": 14.56,
+                    "explain_plan_file": "logs/explain_plan.txt"
+                }
+            }
+        },
+        "E02_Broadcast_Pruning_Shuffle16": {
+            "exp_id": "E02_Broadcast_Pruning_Shuffle16",
+            "mode": "optimized",
+            "change_desc": "E01 + Early Column Pruning (7/19 cols) + BroadcastHashJoin + spark.sql.shuffle.partitions=16",
+            "hypothesis": "Nếu bước đọc CSV và gom nhóm HashAggregate vẫn tốn chi phí parse 12 cột thừa và lập lịch 200 shuffle tasks trên máy local, thì khi chỉ đọc 7 cột cần thiết, ép F.broadcast(df_zones) và giảm spark.sql.shuffle.partitions từ 200 xuống 16, thời gian đọc I/O và overhead lập lịch task sẽ giảm thêm mà kết quả nghiệp vụ không đổi.",
+            "runs": [
+                23.31,
+                22.37,
+                24.71
+            ],
+            "median_sec": 23.31,
+            "mean_sec": 23.46,
+            "stdev_sec": 1.18,
+            "min_sec": 22.37,
+            "max_sec": 24.71,
+            "correctness_pass": true,
+            "correctness_checks": {
+                "raw_row_count_match": true,
+                "clean_row_count_match": true,
+                "join_unmatched_zero_match": true,
+                "output_row_count_match": true,
+                "sum_total_trips_match": true,
+                "sum_total_revenue_match": true,
+                "top1_signature_match": true
+            },
+            "sample_result": {
+                "timestamp": "2026-11-18T22:47:24.575720",
+                "mode": "optimized",
+                "environment": {
+                    "python_version": "3.13.7",
+                    "spark_version": "3.5.0",
+                    "master": "local[*]",
+                    "os": "nt",
+                    "shuffle_partitions": 16
+                },
+                "input_contract": {
+                    "raw_input_path": "data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906",
+                    "input_size_mb": 439.03,
+                    "raw_row_count": 3530109,
+                    "initial_partitions": 16
+                },
+                "transformations": {
+                    "after_t1_cleaning_count": 3317606,
+                    "t1_dropped_rows": 212503,
+                    "after_t2_outlier_filter_count": 3312154,
+                    "t2_dropped_rows": 5452,
+                    "after_t3_feature_engineering_count": 3312154,
+                    "total_dropped_rows": 217955,
+                    "valid_row_ratio_pct": 93.83
+                },
+                "join_validation": {
+                    "lookup_path": "data/source/taxi_zone_lookup.csv",
+                    "lookup_total_rows": 265,
+                    "lookup_distinct_keys": 265,
+                    "join_type": "BROADCAST_LEFT",
+                    "join_key": "PULocationID == LocationID",
+                    "rows_before_join": 3312154,
+                    "rows_after_join": 3312154,
+                    "matched_valid_zone_rows": 3308365,
+                    "unknown_or_outside_nyc_rows": 3789,
+                    "unmatched_null_key_rows": 0
+                },
+                "aggregation_output": {
+                    "output_path": "output/traffic_zone_hourly_kpi",
+                    "output_format": "csv",
+                    "write_mode": "overwrite",
+                    "output_row_count": 10778,
+                    "output_partitions": 1
+                },
+                "correctness_signature": {
+                    "sum_total_trips": 3312154,
+                    "sum_total_revenue_usd": 99587514.55,
+                    "sum_congested_trips": 1151467,
+                    "top1_record_signature": "161_13_10569"
+                },
+                "baseline_performance": {
+                    "total_runtime_seconds": 24.71,
+                    "explain_plan_file": "logs/explain_plan.txt"
+                }
+            }
+        }
+    }
+}

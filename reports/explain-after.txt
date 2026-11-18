@@ -1,0 +1,238 @@
+== Physical Plan ==
+AdaptiveSparkPlan (27)
++- == Final Plan ==
+   TableCacheQueryStage (26), Statistics(sizeInBytes=1102.3 KiB, rowCount=1.08E+4)
+   +- InMemoryTableScan (1)
+         +- InMemoryRelation (2)
+               +- AdaptiveSparkPlan (25)
+                  +- Sort (24)
+                     +- Exchange (23)
+                        +- HashAggregate (22)
+                           +- Exchange (21)
+                              +- HashAggregate (20)
+                                 +- Project (19)
+                                    +- Project (18)
+                                       +- BroadcastHashJoin LeftOuter BuildRight (17)
+                                          :- Project (7)
+                                          :  +- Project (6)
+                                          :     +- Project (5)
+                                          :        +- Filter (4)
+                                          :           +- Scan csv  (3)
+                                          +- BroadcastExchange (16)
+                                             +- SortAggregate (15)
+                                                +- Sort (14)
+                                                   +- Exchange (13)
+                                                      +- SortAggregate (12)
+                                                         +- Sort (11)
+                                                            +- Project (10)
+                                                               +- Filter (9)
+                                                                  +- Scan csv  (8)
++- == Initial Plan ==
+   InMemoryTableScan (1)
+      +- InMemoryRelation (2)
+            +- AdaptiveSparkPlan (25)
+               +- Sort (24)
+                  +- Exchange (23)
+                     +- HashAggregate (22)
+                        +- Exchange (21)
+                           +- HashAggregate (20)
+                              +- Project (19)
+                                 +- Project (18)
+                                    +- BroadcastHashJoin LeftOuter BuildRight (17)
+                                       :- Project (7)
+                                       :  +- Project (6)
+                                       :     +- Project (5)
+                                       :        +- Filter (4)
+                                       :           +- Scan csv  (3)
+                                       +- BroadcastExchange (16)
+                                          +- SortAggregate (15)
+                                             +- Sort (14)
+                                                +- Exchange (13)
+                                                   +- SortAggregate (12)
+                                                      +- Sort (11)
+                                                         +- Project (10)
+                                                            +- Filter (9)
+                                                               +- Scan csv  (8)
+
+
+(1) InMemoryTableScan
+Output [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+Arguments: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+
+(2) InMemoryRelation
+Arguments: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337], CachedRDDBuilder(org.apache.spark.sql.execution.columnar.DefaultCachedBatchSerializer@64ec4587,StorageLevel(disk, memory, 1 replicas),AdaptiveSparkPlan isFinalPlan=true
++- == Final Plan ==
+   *(5) Sort [total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST], true, 0
+   +- AQEShuffleRead coalesced
+      +- ShuffleQueryStage 3
+         +- Exchange rangepartitioning(total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST, 16), ENSURE_REQUIREMENTS, [plan_id=12607]
+            +- *(4) HashAggregate(keys=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144], functions=[count(1), avg(speed_mph#18921), avg(trip_duration_min#18910), avg(trip_distance#18880), sum(is_congested_trip#19187), sum(total_amount#18900), avg(fare_amount#18890)], output=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337])
+               +- AQEShuffleRead coalesced
+                  +- ShuffleQueryStage 2
+                     +- Exchange hashpartitioning(PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, 16), ENSURE_REQUIREMENTS, [plan_id=12565]
+                        +- *(3) HashAggregate(keys=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144], functions=[partial_count(1), partial_avg(speed_mph#18921), partial_avg(trip_duration_min#18910), partial_avg(trip_distance#18880), partial_sum(is_congested_trip#19187), partial_sum(total_amount#18900), partial_avg(fare_amount#18890)], output=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, count#19369L, sum#19370, count#19371L, sum#19372, count#19373L, sum#19374, count#19375L, sum#19376L, sum#19377, sum#19378, count#19379L])
+                           +- *(3) Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, coalesce(pickup_borough#18965, Unknown) AS pickup_borough#19210, coalesce(pickup_zone#18966, Unmapped Zone) AS pickup_zone#19233, pickup_hour#19087, is_weekend#19124, ((NOT is_weekend#19124 AND (((pickup_hour#19087 >= 7) AND (pickup_hour#19087 <= 9)) OR ((pickup_hour#19087 >= 16) AND (pickup_hour#19087 <= 19)))) <=> true) AS is_rush_hour#19144, CASE WHEN (speed_mph#18921 < 8.0) THEN 1 ELSE 0 END AS is_congested_trip#19187]
+                              +- *(3) Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, pickup_borough#18965, pickup_zone#18966, hour(pickup_ts#18841, Some(UTC)) AS pickup_hour#19087, (dayofweek(cast(pickup_ts#18841 as date)) IN (1,7) <=> true) AS is_weekend#19124]
+                                 +- *(3) BroadcastHashJoin [PULocationID#18860], [pu_loc_id#18964], LeftOuter, BuildRight, false
+                                    :- *(3) Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, trip_duration_min#18910, CASE WHEN (trip_duration_min#18910 > 0.0) THEN round((trip_distance#18880 / (trip_duration_min#18910 / 60.0)), 2) ELSE -1.0 END AS speed_mph#18921]
+                                    :  +- *(3) Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, round((cast((unix_timestamp(dropoff_ts#18850, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(pickup_ts#18841, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) AS trip_duration_min#18910]
+                                    :     +- *(3) Project [cast(PULocationID#18777 as int) AS PULocationID#18860, cast(trip_distance#18774 as double) AS trip_distance#18880, cast(fare_amount#18780 as double) AS fare_amount#18890, cast(total_amount#18786 as double) AS total_amount#18900, cast(tpep_pickup_datetime#18771 as timestamp) AS pickup_ts#18841, cast(tpep_dropoff_datetime#18772 as timestamp) AS dropoff_ts#18850]
+                                    :        +- *(3) Filter (((((((((((((((((((isnotnull(tpep_pickup_datetime#18771) AND isnotnull(tpep_dropoff_datetime#18772)) AND isnotnull(PULocationID#18777)) AND isnotnull(DOLocationID#18778)) AND isnotnull(trip_distance#18774)) AND isnotnull(fare_amount#18780)) AND isnotnull(total_amount#18786)) AND isnotnull(cast(tpep_pickup_datetime#18771 as timestamp))) AND isnotnull(cast(tpep_dropoff_datetime#18772 as timestamp))) AND isnotnull(cast(PULocationID#18777 as int))) AND isnotnull(cast(DOLocationID#18778 as int))) AND (cast(tpep_dropoff_datetime#18772 as timestamp) > cast(tpep_pickup_datetime#18771 as timestamp))) AND (cast(trip_distance#18774 as double) >= 0.1)) AND (cast(trip_distance#18774 as double) <= 200.0)) AND (cast(fare_amount#18780 as double) >= 0.01)) AND (cast(total_amount#18786 as double) >= 0.01)) AND (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) >= 1.0)) AND (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) <= 300.0)) AND CASE WHEN (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((cast(trip_distance#18774 as double) / (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) >= 0.5) ELSE false END) AND CASE WHEN (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((cast(trip_distance#18774 as double) / (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) <= 80.0) ELSE true END)
+                                    :           +- FileScan csv [tpep_pickup_datetime#18771,tpep_dropoff_datetime#18772,trip_distance#18774,PULocationID#18777,DOLocationID#18778,fare_amount#18780,total_amount#18786] Batched: false, DataFilters: [isnotnull(tpep_pickup_datetime#18771), isnotnull(tpep_dropoff_datetime#18772), isnotnull(PULocat..., Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/ADMIN/bigdata_project/data/raw/nyc_taxi/ingest_date=202..., PartitionFilters: [], PushedFilters: [IsNotNull(tpep_pickup_datetime), IsNotNull(tpep_dropoff_datetime), IsNotNull(PULocationID), IsNo..., ReadSchema: struct<tpep_pickup_datetime:string,tpep_dropoff_datetime:string,trip_distance:string,PULocationID...
+                                    +- BroadcastQueryStage 1
+                                       +- BroadcastExchange HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=12488]
+                                          +- SortAggregate(key=[LocationID#18958], functions=[first(Borough#18951, false), first(Zone#18952, false)], output=[pu_loc_id#18964, pickup_borough#18965, pickup_zone#18966])
+                                             +- *(2) Sort [LocationID#18958 ASC NULLS FIRST], false, 0
+                                                +- AQEShuffleRead coalesced
+                                                   +- ShuffleQueryStage 0
+                                                      +- Exchange hashpartitioning(LocationID#18958, 16), ENSURE_REQUIREMENTS, [plan_id=12396]
+                                                         +- SortAggregate(key=[LocationID#18958], functions=[partial_first(Borough#18951, false), partial_first(Zone#18952, false)], output=[LocationID#18958, first#19384, valueSet#19385, first#19386, valueSet#19387])
+                                                            +- *(1) Sort [LocationID#18958 ASC NULLS FIRST], false, 0
+                                                               +- *(1) Project [cast(LocationID#18950 as int) AS LocationID#18958, Borough#18951, Zone#18952]
+                                                                  +- *(1) Filter isnotnull(cast(LocationID#18950 as int))
+                                                                     +- FileScan csv [LocationID#18950,Borough#18951,Zone#18952] Batched: false, DataFilters: [isnotnull(cast(LocationID#18950 as int))], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/ADMIN/bigdata_project/data/source/taxi_zone_lookup.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<LocationID:string,Borough:string,Zone:string>
++- == Initial Plan ==
+   Sort [total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST], true, 0
+   +- Exchange rangepartitioning(total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST, 16), ENSURE_REQUIREMENTS, [plan_id=12309]
+      +- HashAggregate(keys=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144], functions=[count(1), avg(speed_mph#18921), avg(trip_duration_min#18910), avg(trip_distance#18880), sum(is_congested_trip#19187), sum(total_amount#18900), avg(fare_amount#18890)], output=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337])
+         +- Exchange hashpartitioning(PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, 16), ENSURE_REQUIREMENTS, [plan_id=12306]
+            +- HashAggregate(keys=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144], functions=[partial_count(1), partial_avg(speed_mph#18921), partial_avg(trip_duration_min#18910), partial_avg(trip_distance#18880), partial_sum(is_congested_trip#19187), partial_sum(total_amount#18900), partial_avg(fare_amount#18890)], output=[PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, count#19369L, sum#19370, count#19371L, sum#19372, count#19373L, sum#19374, count#19375L, sum#19376L, sum#19377, sum#19378, count#19379L])
+               +- Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, coalesce(pickup_borough#18965, Unknown) AS pickup_borough#19210, coalesce(pickup_zone#18966, Unmapped Zone) AS pickup_zone#19233, pickup_hour#19087, is_weekend#19124, ((NOT is_weekend#19124 AND (((pickup_hour#19087 >= 7) AND (pickup_hour#19087 <= 9)) OR ((pickup_hour#19087 >= 16) AND (pickup_hour#19087 <= 19)))) <=> true) AS is_rush_hour#19144, CASE WHEN (speed_mph#18921 < 8.0) THEN 1 ELSE 0 END AS is_congested_trip#19187]
+                  +- Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, pickup_borough#18965, pickup_zone#18966, hour(pickup_ts#18841, Some(UTC)) AS pickup_hour#19087, (dayofweek(cast(pickup_ts#18841 as date)) IN (1,7) <=> true) AS is_weekend#19124]
+                     +- BroadcastHashJoin [PULocationID#18860], [pu_loc_id#18964], LeftOuter, BuildRight, false
+                        :- Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, trip_duration_min#18910, CASE WHEN (trip_duration_min#18910 > 0.0) THEN round((trip_distance#18880 / (trip_duration_min#18910 / 60.0)), 2) ELSE -1.0 END AS speed_mph#18921]
+                        :  +- Project [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, round((cast((unix_timestamp(dropoff_ts#18850, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(pickup_ts#18841, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) AS trip_duration_min#18910]
+                        :     +- Project [cast(PULocationID#18777 as int) AS PULocationID#18860, cast(trip_distance#18774 as double) AS trip_distance#18880, cast(fare_amount#18780 as double) AS fare_amount#18890, cast(total_amount#18786 as double) AS total_amount#18900, cast(tpep_pickup_datetime#18771 as timestamp) AS pickup_ts#18841, cast(tpep_dropoff_datetime#18772 as timestamp) AS dropoff_ts#18850]
+                        :        +- Filter (((((((((((((((((((isnotnull(tpep_pickup_datetime#18771) AND isnotnull(tpep_dropoff_datetime#18772)) AND isnotnull(PULocationID#18777)) AND isnotnull(DOLocationID#18778)) AND isnotnull(trip_distance#18774)) AND isnotnull(fare_amount#18780)) AND isnotnull(total_amount#18786)) AND isnotnull(cast(tpep_pickup_datetime#18771 as timestamp))) AND isnotnull(cast(tpep_dropoff_datetime#18772 as timestamp))) AND isnotnull(cast(PULocationID#18777 as int))) AND isnotnull(cast(DOLocationID#18778 as int))) AND (cast(tpep_dropoff_datetime#18772 as timestamp) > cast(tpep_pickup_datetime#18771 as timestamp))) AND (cast(trip_distance#18774 as double) >= 0.1)) AND (cast(trip_distance#18774 as double) <= 200.0)) AND (cast(fare_amount#18780 as double) >= 0.01)) AND (cast(total_amount#18786 as double) >= 0.01)) AND (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) >= 1.0)) AND (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) <= 300.0)) AND CASE WHEN (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((cast(trip_distance#18774 as double) / (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) >= 0.5) ELSE false END) AND CASE WHEN (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((cast(trip_distance#18774 as double) / (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) <= 80.0) ELSE true END)
+                        :           +- FileScan csv [tpep_pickup_datetime#18771,tpep_dropoff_datetime#18772,trip_distance#18774,PULocationID#18777,DOLocationID#18778,fare_amount#18780,total_amount#18786] Batched: false, DataFilters: [isnotnull(tpep_pickup_datetime#18771), isnotnull(tpep_dropoff_datetime#18772), isnotnull(PULocat..., Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/ADMIN/bigdata_project/data/raw/nyc_taxi/ingest_date=202..., PartitionFilters: [], PushedFilters: [IsNotNull(tpep_pickup_datetime), IsNotNull(tpep_dropoff_datetime), IsNotNull(PULocationID), IsNo..., ReadSchema: struct<tpep_pickup_datetime:string,tpep_dropoff_datetime:string,trip_distance:string,PULocationID...
+                        +- BroadcastExchange HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=12300]
+                           +- SortAggregate(key=[LocationID#18958], functions=[first(Borough#18951, false), first(Zone#18952, false)], output=[pu_loc_id#18964, pickup_borough#18965, pickup_zone#18966])
+                              +- Sort [LocationID#18958 ASC NULLS FIRST], false, 0
+                                 +- Exchange hashpartitioning(LocationID#18958, 16), ENSURE_REQUIREMENTS, [plan_id=12296]
+                                    +- SortAggregate(key=[LocationID#18958], functions=[partial_first(Borough#18951, false), partial_first(Zone#18952, false)], output=[LocationID#18958, first#19384, valueSet#19385, first#19386, valueSet#19387])
+                                       +- Sort [LocationID#18958 ASC NULLS FIRST], false, 0
+                                          +- Project [cast(LocationID#18950 as int) AS LocationID#18958, Borough#18951, Zone#18952]
+                                             +- Filter isnotnull(cast(LocationID#18950 as int))
+                                                +- FileScan csv [LocationID#18950,Borough#18951,Zone#18952] Batched: false, DataFilters: [isnotnull(cast(LocationID#18950 as int))], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/ADMIN/bigdata_project/data/source/taxi_zone_lookup.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<LocationID:string,Borough:string,Zone:string>
+,None), [total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST]
+
+(3) Scan csv 
+Output [7]: [tpep_pickup_datetime#18771, tpep_dropoff_datetime#18772, trip_distance#18774, PULocationID#18777, DOLocationID#18778, fare_amount#18780, total_amount#18786]
+Batched: false
+Location: InMemoryFileIndex [file:/C:/Users/ADMIN/bigdata_project/data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906]
+PushedFilters: [IsNotNull(tpep_pickup_datetime), IsNotNull(tpep_dropoff_datetime), IsNotNull(PULocationID), IsNotNull(DOLocationID), IsNotNull(trip_distance), IsNotNull(fare_amount), IsNotNull(total_amount)]
+ReadSchema: struct<tpep_pickup_datetime:string,tpep_dropoff_datetime:string,trip_distance:string,PULocationID:string,DOLocationID:string,fare_amount:string,total_amount:string>
+
+(4) Filter
+Input [7]: [tpep_pickup_datetime#18771, tpep_dropoff_datetime#18772, trip_distance#18774, PULocationID#18777, DOLocationID#18778, fare_amount#18780, total_amount#18786]
+Condition : (((((((((((((((((((isnotnull(tpep_pickup_datetime#18771) AND isnotnull(tpep_dropoff_datetime#18772)) AND isnotnull(PULocationID#18777)) AND isnotnull(DOLocationID#18778)) AND isnotnull(trip_distance#18774)) AND isnotnull(fare_amount#18780)) AND isnotnull(total_amount#18786)) AND isnotnull(cast(tpep_pickup_datetime#18771 as timestamp))) AND isnotnull(cast(tpep_dropoff_datetime#18772 as timestamp))) AND isnotnull(cast(PULocationID#18777 as int))) AND isnotnull(cast(DOLocationID#18778 as int))) AND (cast(tpep_dropoff_datetime#18772 as timestamp) > cast(tpep_pickup_datetime#18771 as timestamp))) AND (cast(trip_distance#18774 as double) >= 0.1)) AND (cast(trip_distance#18774 as double) <= 200.0)) AND (cast(fare_amount#18780 as double) >= 0.01)) AND (cast(total_amount#18786 as double) >= 0.01)) AND (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) >= 1.0)) AND (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) <= 300.0)) AND CASE WHEN (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((cast(trip_distance#18774 as double) / (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) >= 0.5) ELSE false END) AND CASE WHEN (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((cast(trip_distance#18774 as double) / (round((cast((unix_timestamp(cast(tpep_dropoff_datetime#18772 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(cast(tpep_pickup_datetime#18771 as timestamp), yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) <= 80.0) ELSE true END)
+
+(5) Project
+Output [6]: [cast(PULocationID#18777 as int) AS PULocationID#18860, cast(trip_distance#18774 as double) AS trip_distance#18880, cast(fare_amount#18780 as double) AS fare_amount#18890, cast(total_amount#18786 as double) AS total_amount#18900, cast(tpep_pickup_datetime#18771 as timestamp) AS pickup_ts#18841, cast(tpep_dropoff_datetime#18772 as timestamp) AS dropoff_ts#18850]
+Input [7]: [tpep_pickup_datetime#18771, tpep_dropoff_datetime#18772, trip_distance#18774, PULocationID#18777, DOLocationID#18778, fare_amount#18780, total_amount#18786]
+
+(6) Project
+Output [6]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, round((cast((unix_timestamp(dropoff_ts#18850, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(pickup_ts#18841, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) AS trip_duration_min#18910]
+Input [6]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, dropoff_ts#18850]
+
+(7) Project
+Output [7]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, trip_duration_min#18910, CASE WHEN (trip_duration_min#18910 > 0.0) THEN round((trip_distance#18880 / (trip_duration_min#18910 / 60.0)), 2) ELSE -1.0 END AS speed_mph#18921]
+Input [6]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, trip_duration_min#18910]
+
+(8) Scan csv 
+Output [3]: [LocationID#18950, Borough#18951, Zone#18952]
+Batched: false
+Location: InMemoryFileIndex [file:/C:/Users/ADMIN/bigdata_project/data/source/taxi_zone_lookup.csv]
+ReadSchema: struct<LocationID:string,Borough:string,Zone:string>
+
+(9) Filter
+Input [3]: [LocationID#18950, Borough#18951, Zone#18952]
+Condition : isnotnull(cast(LocationID#18950 as int))
+
+(10) Project
+Output [3]: [cast(LocationID#18950 as int) AS LocationID#18958, Borough#18951, Zone#18952]
+Input [3]: [LocationID#18950, Borough#18951, Zone#18952]
+
+(11) Sort
+Input [3]: [LocationID#18958, Borough#18951, Zone#18952]
+Arguments: [LocationID#18958 ASC NULLS FIRST], false, 0
+
+(12) SortAggregate
+Input [3]: [LocationID#18958, Borough#18951, Zone#18952]
+Keys [1]: [LocationID#18958]
+Functions [2]: [partial_first(Borough#18951, false), partial_first(Zone#18952, false)]
+Aggregate Attributes [4]: [first#19380, valueSet#19381, first#19382, valueSet#19383]
+Results [5]: [LocationID#18958, first#19384, valueSet#19385, first#19386, valueSet#19387]
+
+(13) Exchange
+Input [5]: [LocationID#18958, first#19384, valueSet#19385, first#19386, valueSet#19387]
+Arguments: hashpartitioning(LocationID#18958, 16), ENSURE_REQUIREMENTS, [plan_id=12677]
+
+(14) Sort
+Input [5]: [LocationID#18958, first#19384, valueSet#19385, first#19386, valueSet#19387]
+Arguments: [LocationID#18958 ASC NULLS FIRST], false, 0
+
+(15) SortAggregate
+Input [5]: [LocationID#18958, first#19384, valueSet#19385, first#19386, valueSet#19387]
+Keys [1]: [LocationID#18958]
+Functions [2]: [first(Borough#18951, false), first(Zone#18952, false)]
+Aggregate Attributes [2]: [first(Borough#18951)()#19352, first(Zone#18952)()#19354]
+Results [3]: [LocationID#18958 AS pu_loc_id#18964, first(Borough#18951)()#19352 AS pickup_borough#18965, first(Zone#18952)()#19354 AS pickup_zone#18966]
+
+(16) BroadcastExchange
+Input [3]: [pu_loc_id#18964, pickup_borough#18965, pickup_zone#18966]
+Arguments: HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=12681]
+
+(17) BroadcastHashJoin
+Left keys [1]: [PULocationID#18860]
+Right keys [1]: [pu_loc_id#18964]
+Join type: LeftOuter
+Join condition: None
+
+(18) Project
+Output [10]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, pickup_borough#18965, pickup_zone#18966, hour(pickup_ts#18841, Some(UTC)) AS pickup_hour#19087, (dayofweek(cast(pickup_ts#18841 as date)) IN (1,7) <=> true) AS is_weekend#19124]
+Input [10]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, pickup_ts#18841, trip_duration_min#18910, speed_mph#18921, pu_loc_id#18964, pickup_borough#18965, pickup_zone#18966]
+
+(19) Project
+Output [12]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, coalesce(pickup_borough#18965, Unknown) AS pickup_borough#19210, coalesce(pickup_zone#18966, Unmapped Zone) AS pickup_zone#19233, pickup_hour#19087, is_weekend#19124, ((NOT is_weekend#19124 AND (((pickup_hour#19087 >= 7) AND (pickup_hour#19087 <= 9)) OR ((pickup_hour#19087 >= 16) AND (pickup_hour#19087 <= 19)))) <=> true) AS is_rush_hour#19144, CASE WHEN (speed_mph#18921 < 8.0) THEN 1 ELSE 0 END AS is_congested_trip#19187]
+Input [10]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, pickup_borough#18965, pickup_zone#18966, pickup_hour#19087, is_weekend#19124]
+
+(20) HashAggregate
+Input [12]: [PULocationID#18860, trip_distance#18880, fare_amount#18890, total_amount#18900, trip_duration_min#18910, speed_mph#18921, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, is_congested_trip#19187]
+Keys [6]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144]
+Functions [7]: [partial_count(1), partial_avg(speed_mph#18921), partial_avg(trip_duration_min#18910), partial_avg(trip_distance#18880), partial_sum(is_congested_trip#19187), partial_sum(total_amount#18900), partial_avg(fare_amount#18890)]
+Aggregate Attributes [11]: [count#19358L, sum#19359, count#19360L, sum#19361, count#19362L, sum#19363, count#19364L, sum#19365L, sum#19366, sum#19367, count#19368L]
+Results [17]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, count#19369L, sum#19370, count#19371L, sum#19372, count#19373L, sum#19374, count#19375L, sum#19376L, sum#19377, sum#19378, count#19379L]
+
+(21) Exchange
+Input [17]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, count#19369L, sum#19370, count#19371L, sum#19372, count#19373L, sum#19374, count#19375L, sum#19376L, sum#19377, sum#19378, count#19379L]
+Arguments: hashpartitioning(PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, 16), ENSURE_REQUIREMENTS, [plan_id=12687]
+
+(22) HashAggregate
+Input [17]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, count#19369L, sum#19370, count#19371L, sum#19372, count#19373L, sum#19374, count#19375L, sum#19376L, sum#19377, sum#19378, count#19379L]
+Keys [6]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144]
+Functions [7]: [count(1), avg(speed_mph#18921), avg(trip_duration_min#18910), avg(trip_distance#18880), sum(is_congested_trip#19187), sum(total_amount#18900), avg(fare_amount#18890)]
+Aggregate Attributes [7]: [count(1)#19321L, avg(speed_mph#18921)#19323, avg(trip_duration_min#18910)#19325, avg(trip_distance#18880)#19327, sum(is_congested_trip#19187)#19329L, sum(total_amount#18900)#19334, avg(fare_amount#18890)#19336]
+Results [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, count(1)#19321L AS total_trips#19322L, round(avg(speed_mph#18921)#19323, 2) AS avg_speed_mph#19324, round(avg(trip_duration_min#18910)#19325, 2) AS avg_duration_min#19326, round(avg(trip_distance#18880)#19327, 2) AS avg_distance_miles#19328, sum(is_congested_trip#19187)#19329L AS congested_trips#19330L, round(((cast(sum(is_congested_trip#19187)#19329L as double) / cast(count(1)#19321L as double)) * 100.0), 2) AS congestion_rate_pct#19333, round(sum(total_amount#18900)#19334, 2) AS total_revenue_usd#19335, round(avg(fare_amount#18890)#19336, 2) AS avg_fare_usd#19337]
+
+(23) Exchange
+Input [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+Arguments: rangepartitioning(total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST, 16), ENSURE_REQUIREMENTS, [plan_id=12690]
+
+(24) Sort
+Input [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+Arguments: [total_trips#19322L DESC NULLS LAST, avg_speed_mph#19324 ASC NULLS FIRST], true, 0
+
+(25) AdaptiveSparkPlan
+Output [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+Arguments: isFinalPlan=false
+
+(26) TableCacheQueryStage
+Output [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+Arguments: 0
+
+(27) AdaptiveSparkPlan
+Output [14]: [PULocationID#18860, pickup_borough#19210, pickup_zone#19233, pickup_hour#19087, is_weekend#19124, is_rush_hour#19144, total_trips#19322L, avg_speed_mph#19324, avg_duration_min#19326, avg_distance_miles#19328, congested_trips#19330L, congestion_rate_pct#19333, total_revenue_usd#19335, avg_fare_usd#19337]
+Arguments: isFinalPlan=true
+
+

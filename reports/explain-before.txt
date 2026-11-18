@@ -1,0 +1,272 @@
+== Physical Plan ==
+AdaptiveSparkPlan (46)
++- == Final Plan ==
+   * Sort (27)
+   +- AQEShuffleRead (26)
+      +- ShuffleQueryStage (25), Statistics(sizeInBytes=1571.1 KiB, rowCount=1.08E+4)
+         +- Exchange (24)
+            +- * HashAggregate (23)
+               +- AQEShuffleRead (22)
+                  +- ShuffleQueryStage (21), Statistics(sizeInBytes=12.0 MiB, rowCount=7.21E+4)
+                     +- Exchange (20)
+                        +- * HashAggregate (19)
+                           +- * Project (18)
+                              +- * BroadcastHashJoin LeftOuter BuildRight (17)
+                                 :- * Project (5)
+                                 :  +- * Project (4)
+                                 :     +- * Project (3)
+                                 :        +- * Filter (2)
+                                 :           +- Scan csv  (1)
+                                 +- BroadcastQueryStage (16), Statistics(sizeInBytes=1026.1 KiB, rowCount=265)
+                                    +- BroadcastExchange (15)
+                                       +- SortAggregate (14)
+                                          +- * Sort (13)
+                                             +- AQEShuffleRead (12)
+                                                +- ShuffleQueryStage (11), Statistics(sizeInBytes=20.2 KiB, rowCount=265)
+                                                   +- Exchange (10)
+                                                      +- SortAggregate (9)
+                                                         +- * Sort (8)
+                                                            +- * Filter (7)
+                                                               +- Scan csv  (6)
++- == Initial Plan ==
+   Sort (45)
+   +- Exchange (44)
+      +- HashAggregate (43)
+         +- Exchange (42)
+            +- HashAggregate (41)
+               +- Project (40)
+                  +- BroadcastHashJoin LeftOuter BuildRight (39)
+                     :- Project (31)
+                     :  +- Project (30)
+                     :     +- Project (29)
+                     :        +- Filter (28)
+                     :           +- Scan csv  (1)
+                     +- BroadcastExchange (38)
+                        +- SortAggregate (37)
+                           +- Sort (36)
+                              +- Exchange (35)
+                                 +- SortAggregate (34)
+                                    +- Sort (33)
+                                       +- Filter (32)
+                                          +- Scan csv  (6)
+
+
+(1) Scan csv 
+Output [7]: [tpep_pickup_datetime#3260, tpep_dropoff_datetime#3261, trip_distance#3263, PULocationID#3266, DOLocationID#3267, fare_amount#3269, total_amount#3275]
+Batched: false
+Location: InMemoryFileIndex [file:/C:/Users/ADMIN/bigdata_project/data/raw/nyc_taxi/ingest_date=2026-10-24/run_20261024_084906]
+PushedFilters: [IsNotNull(trip_distance), IsNotNull(fare_amount), IsNotNull(total_amount), IsNotNull(tpep_pickup_datetime), IsNotNull(tpep_dropoff_datetime), IsNotNull(PULocationID), IsNotNull(DOLocationID), GreaterThanOrEqual(trip_distance,0.1), LessThanOrEqual(trip_distance,200.0), GreaterThanOrEqual(fare_amount,0.01), GreaterThanOrEqual(total_amount,0.01)]
+ReadSchema: struct<tpep_pickup_datetime:timestamp,tpep_dropoff_datetime:timestamp,trip_distance:double,PULocationID:int,DOLocationID:int,fare_amount:double,total_amount:double>
+
+(2) Filter [codegen id : 3]
+Input [7]: [tpep_pickup_datetime#3260, tpep_dropoff_datetime#3261, trip_distance#3263, PULocationID#3266, DOLocationID#3267, fare_amount#3269, total_amount#3275]
+Condition : (((((((((((((((isnotnull(trip_distance#3263) AND isnotnull(fare_amount#3269)) AND isnotnull(total_amount#3275)) AND isnotnull(tpep_pickup_datetime#3260)) AND isnotnull(tpep_dropoff_datetime#3261)) AND isnotnull(PULocationID#3266)) AND isnotnull(DOLocationID#3267)) AND (tpep_dropoff_datetime#3261 > tpep_pickup_datetime#3260)) AND (trip_distance#3263 >= 0.1)) AND (trip_distance#3263 <= 200.0)) AND (fare_amount#3269 >= 0.01)) AND (total_amount#3275 >= 0.01)) AND (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) >= 1.0)) AND (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) <= 300.0)) AND CASE WHEN (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((trip_distance#3263 / (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) >= 0.5) ELSE false END) AND CASE WHEN (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((trip_distance#3263 / (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) <= 80.0) ELSE true END)
+
+(3) Project [codegen id : 3]
+Output [6]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, tpep_pickup_datetime#3260 AS pickup_ts#3322, round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) AS trip_duration_min#3490]
+Input [7]: [tpep_pickup_datetime#3260, tpep_dropoff_datetime#3261, trip_distance#3263, PULocationID#3266, DOLocationID#3267, fare_amount#3269, total_amount#3275]
+
+(4) Project [codegen id : 3]
+Output [8]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, CASE WHEN (trip_duration_min#3490 > 0.0) THEN round((trip_distance#3263 / (trip_duration_min#3490 / 60.0)), 2) ELSE -1.0 END AS speed_mph#3515, hour(pickup_ts#3322, Some(UTC)) AS pickup_hour#3624, (dayofweek(cast(pickup_ts#3322 as date)) IN (1,7) <=> true) AS is_weekend#3681]
+Input [6]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, pickup_ts#3322, trip_duration_min#3490]
+
+(5) Project [codegen id : 3]
+Output [10]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, ((NOT is_weekend#3681 AND (((pickup_hour#3624 >= 7) AND (pickup_hour#3624 <= 9)) OR ((pickup_hour#3624 >= 16) AND (pickup_hour#3624 <= 19)))) <=> true) AS is_rush_hour#3711, CASE WHEN (speed_mph#3515 < 8.0) THEN 1 ELSE 0 END AS is_congested_trip#3774]
+Input [8]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681]
+
+(6) Scan csv 
+Output [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Batched: false
+Location: InMemoryFileIndex [file:/C:/Users/ADMIN/bigdata_project/data/source/taxi_zone_lookup.csv]
+PushedFilters: [IsNotNull(LocationID)]
+ReadSchema: struct<LocationID:int,Borough:string,Zone:string>
+
+(7) Filter [codegen id : 1]
+Input [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Condition : isnotnull(LocationID#3558)
+
+(8) Sort [codegen id : 1]
+Input [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Arguments: [LocationID#3558 ASC NULLS FIRST], false, 0
+
+(9) SortAggregate
+Input [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Keys [1]: [LocationID#3558]
+Functions [2]: [partial_first(Borough#3559, false), partial_first(Zone#3560, false)]
+Aggregate Attributes [4]: [first#4326, valueSet#4327, first#4328, valueSet#4329]
+Results [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+
+(10) Exchange
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Arguments: hashpartitioning(LocationID#3558, 200), ENSURE_REQUIREMENTS, [plan_id=6066]
+
+(11) ShuffleQueryStage
+Output [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Arguments: 0
+
+(12) AQEShuffleRead
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Arguments: coalesced
+
+(13) Sort [codegen id : 2]
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Arguments: [LocationID#3558 ASC NULLS FIRST], false, 0
+
+(14) SortAggregate
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Keys [1]: [LocationID#3558]
+Functions [2]: [first(Borough#3559, false), first(Zone#3560, false)]
+Aggregate Attributes [2]: [first(Borough#3559)()#4298, first(Zone#3560)()#4300]
+Results [3]: [LocationID#3558 AS pu_loc_id#3589, first(Borough#3559)()#4298 AS pickup_borough#3590, first(Zone#3560)()#4300 AS pickup_zone#3591]
+
+(15) BroadcastExchange
+Input [3]: [pu_loc_id#3589, pickup_borough#3590, pickup_zone#3591]
+Arguments: HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=6149]
+
+(16) BroadcastQueryStage
+Output [3]: [pu_loc_id#3589, pickup_borough#3590, pickup_zone#3591]
+Arguments: 1
+
+(17) BroadcastHashJoin [codegen id : 3]
+Left keys [1]: [PULocationID#3266]
+Right keys [1]: [pu_loc_id#3589]
+Join type: LeftOuter
+Join condition: None
+
+(18) Project [codegen id : 3]
+Output [12]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, is_congested_trip#3774, coalesce(pickup_borough#3590, Unknown) AS pickup_borough#4027, coalesce(pickup_zone#3591, Unmapped Zone) AS pickup_zone#4064]
+Input [13]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, is_congested_trip#3774, pu_loc_id#3589, pickup_borough#3590, pickup_zone#3591]
+
+(19) HashAggregate [codegen id : 3]
+Input [12]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, is_congested_trip#3774, pickup_borough#4027, pickup_zone#4064]
+Keys [6]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711]
+Functions [7]: [partial_count(1), partial_avg(speed_mph#3515), partial_avg(trip_duration_min#3490), partial_avg(trip_distance#3263), partial_sum(is_congested_trip#3774), partial_sum(total_amount#3275), partial_avg(fare_amount#3269)]
+Aggregate Attributes [11]: [count#4304L, sum#4305, count#4306L, sum#4307, count#4308L, sum#4309, count#4310L, sum#4311L, sum#4312, sum#4313, count#4314L]
+Results [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+
+(20) Exchange
+Input [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+Arguments: hashpartitioning(PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, 200), ENSURE_REQUIREMENTS, [plan_id=6219]
+
+(21) ShuffleQueryStage
+Output [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+Arguments: 2
+
+(22) AQEShuffleRead
+Input [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+Arguments: coalesced
+
+(23) HashAggregate [codegen id : 4]
+Input [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+Keys [6]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711]
+Functions [7]: [count(1), avg(speed_mph#3515), avg(trip_duration_min#3490), avg(trip_distance#3263), sum(is_congested_trip#3774), sum(total_amount#3275), avg(fare_amount#3269)]
+Aggregate Attributes [7]: [count(1)#4208L, avg(speed_mph#3515)#4210, avg(trip_duration_min#3490)#4212, avg(trip_distance#3263)#4214, sum(is_congested_trip#3774)#4216L, sum(total_amount#3275)#4221, avg(fare_amount#3269)#4223]
+Results [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count(1)#4208L AS total_trips#4209L, round(avg(speed_mph#3515)#4210, 2) AS avg_speed_mph#4211, round(avg(trip_duration_min#3490)#4212, 2) AS avg_duration_min#4213, round(avg(trip_distance#3263)#4214, 2) AS avg_distance_miles#4215, sum(is_congested_trip#3774)#4216L AS congested_trips#4217L, round(((cast(sum(is_congested_trip#3774)#4216L as double) / cast(count(1)#4208L as double)) * 100.0), 2) AS congestion_rate_pct#4220, round(sum(total_amount#3275)#4221, 2) AS total_revenue_usd#4222, round(avg(fare_amount#3269)#4223, 2) AS avg_fare_usd#4224]
+
+(24) Exchange
+Input [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: rangepartitioning(total_trips#4209L DESC NULLS LAST, avg_speed_mph#4211 ASC NULLS FIRST, 200), ENSURE_REQUIREMENTS, [plan_id=6259]
+
+(25) ShuffleQueryStage
+Output [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: 3
+
+(26) AQEShuffleRead
+Input [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: coalesced
+
+(27) Sort [codegen id : 5]
+Input [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: [total_trips#4209L DESC NULLS LAST, avg_speed_mph#4211 ASC NULLS FIRST], true, 0
+
+(28) Filter
+Input [7]: [tpep_pickup_datetime#3260, tpep_dropoff_datetime#3261, trip_distance#3263, PULocationID#3266, DOLocationID#3267, fare_amount#3269, total_amount#3275]
+Condition : (((((((((((((((isnotnull(trip_distance#3263) AND isnotnull(fare_amount#3269)) AND isnotnull(total_amount#3275)) AND isnotnull(tpep_pickup_datetime#3260)) AND isnotnull(tpep_dropoff_datetime#3261)) AND isnotnull(PULocationID#3266)) AND isnotnull(DOLocationID#3267)) AND (tpep_dropoff_datetime#3261 > tpep_pickup_datetime#3260)) AND (trip_distance#3263 >= 0.1)) AND (trip_distance#3263 <= 200.0)) AND (fare_amount#3269 >= 0.01)) AND (total_amount#3275 >= 0.01)) AND (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) >= 1.0)) AND (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) <= 300.0)) AND CASE WHEN (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((trip_distance#3263 / (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) >= 0.5) ELSE false END) AND CASE WHEN (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) > 0.0) THEN (round((trip_distance#3263 / (round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) / 60.0)), 2) <= 80.0) ELSE true END)
+
+(29) Project
+Output [6]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, tpep_pickup_datetime#3260 AS pickup_ts#3322, round((cast((unix_timestamp(tpep_dropoff_datetime#3261, yyyy-MM-dd HH:mm:ss, Some(UTC), false) - unix_timestamp(tpep_pickup_datetime#3260, yyyy-MM-dd HH:mm:ss, Some(UTC), false)) as double) / 60.0), 2) AS trip_duration_min#3490]
+Input [7]: [tpep_pickup_datetime#3260, tpep_dropoff_datetime#3261, trip_distance#3263, PULocationID#3266, DOLocationID#3267, fare_amount#3269, total_amount#3275]
+
+(30) Project
+Output [8]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, CASE WHEN (trip_duration_min#3490 > 0.0) THEN round((trip_distance#3263 / (trip_duration_min#3490 / 60.0)), 2) ELSE -1.0 END AS speed_mph#3515, hour(pickup_ts#3322, Some(UTC)) AS pickup_hour#3624, (dayofweek(cast(pickup_ts#3322 as date)) IN (1,7) <=> true) AS is_weekend#3681]
+Input [6]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, pickup_ts#3322, trip_duration_min#3490]
+
+(31) Project
+Output [10]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, ((NOT is_weekend#3681 AND (((pickup_hour#3624 >= 7) AND (pickup_hour#3624 <= 9)) OR ((pickup_hour#3624 >= 16) AND (pickup_hour#3624 <= 19)))) <=> true) AS is_rush_hour#3711, CASE WHEN (speed_mph#3515 < 8.0) THEN 1 ELSE 0 END AS is_congested_trip#3774]
+Input [8]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681]
+
+(32) Filter
+Input [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Condition : isnotnull(LocationID#3558)
+
+(33) Sort
+Input [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Arguments: [LocationID#3558 ASC NULLS FIRST], false, 0
+
+(34) SortAggregate
+Input [3]: [LocationID#3558, Borough#3559, Zone#3560]
+Keys [1]: [LocationID#3558]
+Functions [2]: [partial_first(Borough#3559, false), partial_first(Zone#3560, false)]
+Aggregate Attributes [4]: [first#4326, valueSet#4327, first#4328, valueSet#4329]
+Results [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+
+(35) Exchange
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Arguments: hashpartitioning(LocationID#3558, 200), ENSURE_REQUIREMENTS, [plan_id=6012]
+
+(36) Sort
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Arguments: [LocationID#3558 ASC NULLS FIRST], false, 0
+
+(37) SortAggregate
+Input [5]: [LocationID#3558, first#4330, valueSet#4331, first#4332, valueSet#4333]
+Keys [1]: [LocationID#3558]
+Functions [2]: [first(Borough#3559, false), first(Zone#3560, false)]
+Aggregate Attributes [2]: [first(Borough#3559)()#4298, first(Zone#3560)()#4300]
+Results [3]: [LocationID#3558 AS pu_loc_id#3589, first(Borough#3559)()#4298 AS pickup_borough#3590, first(Zone#3560)()#4300 AS pickup_zone#3591]
+
+(38) BroadcastExchange
+Input [3]: [pu_loc_id#3589, pickup_borough#3590, pickup_zone#3591]
+Arguments: HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=6016]
+
+(39) BroadcastHashJoin
+Left keys [1]: [PULocationID#3266]
+Right keys [1]: [pu_loc_id#3589]
+Join type: LeftOuter
+Join condition: None
+
+(40) Project
+Output [12]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, is_congested_trip#3774, coalesce(pickup_borough#3590, Unknown) AS pickup_borough#4027, coalesce(pickup_zone#3591, Unmapped Zone) AS pickup_zone#4064]
+Input [13]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, is_congested_trip#3774, pu_loc_id#3589, pickup_borough#3590, pickup_zone#3591]
+
+(41) HashAggregate
+Input [12]: [trip_distance#3263, PULocationID#3266, fare_amount#3269, total_amount#3275, trip_duration_min#3490, speed_mph#3515, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, is_congested_trip#3774, pickup_borough#4027, pickup_zone#4064]
+Keys [6]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711]
+Functions [7]: [partial_count(1), partial_avg(speed_mph#3515), partial_avg(trip_duration_min#3490), partial_avg(trip_distance#3263), partial_sum(is_congested_trip#3774), partial_sum(total_amount#3275), partial_avg(fare_amount#3269)]
+Aggregate Attributes [11]: [count#4304L, sum#4305, count#4306L, sum#4307, count#4308L, sum#4309, count#4310L, sum#4311L, sum#4312, sum#4313, count#4314L]
+Results [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+
+(42) Exchange
+Input [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+Arguments: hashpartitioning(PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, 200), ENSURE_REQUIREMENTS, [plan_id=6021]
+
+(43) HashAggregate
+Input [17]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count#4315L, sum#4316, count#4317L, sum#4318, count#4319L, sum#4320, count#4321L, sum#4322L, sum#4323, sum#4324, count#4325L]
+Keys [6]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711]
+Functions [7]: [count(1), avg(speed_mph#3515), avg(trip_duration_min#3490), avg(trip_distance#3263), sum(is_congested_trip#3774), sum(total_amount#3275), avg(fare_amount#3269)]
+Aggregate Attributes [7]: [count(1)#4208L, avg(speed_mph#3515)#4210, avg(trip_duration_min#3490)#4212, avg(trip_distance#3263)#4214, sum(is_congested_trip#3774)#4216L, sum(total_amount#3275)#4221, avg(fare_amount#3269)#4223]
+Results [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, count(1)#4208L AS total_trips#4209L, round(avg(speed_mph#3515)#4210, 2) AS avg_speed_mph#4211, round(avg(trip_duration_min#3490)#4212, 2) AS avg_duration_min#4213, round(avg(trip_distance#3263)#4214, 2) AS avg_distance_miles#4215, sum(is_congested_trip#3774)#4216L AS congested_trips#4217L, round(((cast(sum(is_congested_trip#3774)#4216L as double) / cast(count(1)#4208L as double)) * 100.0), 2) AS congestion_rate_pct#4220, round(sum(total_amount#3275)#4221, 2) AS total_revenue_usd#4222, round(avg(fare_amount#3269)#4223, 2) AS avg_fare_usd#4224]
+
+(44) Exchange
+Input [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: rangepartitioning(total_trips#4209L DESC NULLS LAST, avg_speed_mph#4211 ASC NULLS FIRST, 200), ENSURE_REQUIREMENTS, [plan_id=6024]
+
+(45) Sort
+Input [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: [total_trips#4209L DESC NULLS LAST, avg_speed_mph#4211 ASC NULLS FIRST], true, 0
+
+(46) AdaptiveSparkPlan
+Output [14]: [PULocationID#3266, pickup_borough#4027, pickup_zone#4064, pickup_hour#3624, is_weekend#3681, is_rush_hour#3711, total_trips#4209L, avg_speed_mph#4211, avg_duration_min#4213, avg_distance_miles#4215, congested_trips#4217L, congestion_rate_pct#4220, total_revenue_usd#4222, avg_fare_usd#4224]
+Arguments: isFinalPlan=true
+
+
